@@ -10,9 +10,18 @@ services:
       - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
-  adminer:
-    image: adminer
-    ports:
-      - "8080:8080"
+
+  monitor:
+    build: .
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: monitor_user
+      DB_PASSWORD: secret
+      DB_NAME: monitor_db
+    depends_on:
+      - db
+    restart: unless-stopped
+
 volumes:
   db_data:
