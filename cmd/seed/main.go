@@ -27,19 +27,9 @@ func main() {
 	// Define mock URLs to seed
 	mockURLs := []models.MonitoredURL{
 		{
-			URL:              "https://example.com",
-			CheckIntervalSec: 60,
+			URL:              "https://aiven.io/",
+			CheckIntervalSec: 5,
 			RegexPattern:     "Example Domain",
-		},
-		{
-			URL:              "https://github.com",
-			CheckIntervalSec: 120,
-			RegexPattern:     "GitHub",
-		},
-		{
-			URL:              "https://httpbin.org/status/200",
-			CheckIntervalSec: 30,
-			RegexPattern:     "",
 		},
 		{
 			URL:              "https://www.google.com",
@@ -47,9 +37,19 @@ func main() {
 			RegexPattern:     "Google",
 		},
 		{
+			URL:              "https://github.com",
+			CheckIntervalSec: 120,
+			RegexPattern:     "GitHub",
+		},
+		{
 			URL:              "https://stackoverflow.com",
 			CheckIntervalSec: 180,
 			RegexPattern:     "Stack Overflow",
+		},
+		{
+			URL:              "https://httpbin.org/status/418",
+			CheckIntervalSec: 300,
+			RegexPattern:     "",
 		},
 	}
 

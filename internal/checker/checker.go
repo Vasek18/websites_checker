@@ -15,10 +15,10 @@ type HTTPChecker struct {
 }
 
 // NewHTTPChecker creates a new HTTP checker with a configured client
-func NewHTTPChecker() *HTTPChecker {
+func NewHTTPChecker() *HTTPChecker { // todo just New?
 	return &HTTPChecker{
 		client: &http.Client{
-			Timeout: 30 * time.Second,
+			Timeout: 30 * time.Second, // todo should we have such constrain?
 		},
 	}
 }
@@ -58,7 +58,7 @@ func (c *HTTPChecker) Check(url models.MonitoredURL) models.CheckResult {
 
 // checkRegexPattern checks if the response body matches the given regex pattern
 func (c *HTTPChecker) checkRegexPattern(resp *http.Response, pattern string) (bool, error) {
-	regex, err := regexp.Compile(pattern)
+	regex, err := regexp.Compile(pattern) // todo safe?
 	if err != nil {
 		return false, fmt.Errorf("invalid regex pattern: %w", err)
 	}

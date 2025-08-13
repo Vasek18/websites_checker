@@ -42,7 +42,7 @@ func (s *Scheduler) Start(ctx context.Context) error {
 		return nil
 	}
 
-	// Create a context that we can cancel
+	// Create a context that we can cancel // todo it's already context with cancel
 	ctx, s.cancel = context.WithCancel(ctx)
 
 	log.Printf("Starting monitoring for %d URLs", len(urls))
@@ -50,7 +50,7 @@ func (s *Scheduler) Start(ctx context.Context) error {
 	// Start a goroutine for each URL
 	for _, url := range urls {
 		s.wg.Add(1)
-		go s.monitorURL(ctx, url)
+		go s.startMonitorURL(ctx, url)
 	}
 
 	return nil
@@ -66,8 +66,8 @@ func (s *Scheduler) Stop() {
 	}
 }
 
-// monitorURL runs in a goroutine to monitor a single URL
-func (s *Scheduler) monitorURL(ctx context.Context, url models.MonitoredURL) {
+// startMonitorURL runs in a goroutine to monitor a single URL
+func (s *Scheduler) startMonitorURL(ctx context.Context, url models.MonitoredURL) { // todo startMonitorUrl
 	defer s.wg.Done()
 
 	log.Printf("Starting monitoring for %s (interval: %d seconds)", url.URL, url.CheckIntervalSec)
@@ -92,9 +92,9 @@ func (s *Scheduler) monitorURL(ctx context.Context, url models.MonitoredURL) {
 // performCheck executes a single check for a URL and stores the result
 func (s *Scheduler) performCheck(url models.MonitoredURL) {
 	log.Printf("Checking %s", url.URL)
-	
+
 	result := s.checker.Check(url)
-	
+
 	// Log the result
 	if result.Error != "" {
 		log.Printf("Check failed for %s: %s", url.URL, result.Error)
@@ -107,7 +107,7 @@ func (s *Scheduler) performCheck(url models.MonitoredURL) {
 		if result.ResponseTimeMs != nil {
 			responseTime = string(rune(*result.ResponseTimeMs)) + "ms"
 		}
-		
+
 		regexStatus := ""
 		if result.RegexMatch != nil {
 			if *result.RegexMatch {
@@ -116,11 +116,11 @@ func (s *Scheduler) performCheck(url models.MonitoredURL) {
 				regexStatus = ", regex: no match"
 			}
 		}
-		
-		log.Printf("Check successful for %s: status=%s, time=%s%s", 
+
+		log.Printf("Check successful for %s: status=%s, time=%s%s",
 			url.URL, status, responseTime, regexStatus)
 	}
-	
+
 	// Store the result in the database
 	if err := s.db.InsertCheckResult(result); err != nil {
 		log.Printf("Failed to store check result for %s: %v", url.URL, err)
