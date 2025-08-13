@@ -29,11 +29,6 @@ func main() {
 	}
 	defer database.Close()
 
-	// Create database tables
-	if err := database.CreateTables(); err != nil {
-		log.Fatalf("Failed to create database tables: %v", err)
-	}
-
 	// Create repository
 	repo, err := repository.NewFileRepository()
 	if err != nil {
@@ -42,7 +37,7 @@ func main() {
 
 	// Create and start scheduler
 	sched := scheduler.New(repo, database)
-	
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -55,7 +50,7 @@ func main() {
 	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
 
 	log.Println("Website Monitor is running. Press Ctrl+C to stop.")
-	
+
 	// Wait for shutdown signal
 	<-sigChan
 	log.Println("Received shutdown signal")
@@ -63,6 +58,6 @@ func main() {
 	// Graceful shutdown
 	cancel()
 	sched.Stop()
-	
+
 	log.Println("Website Monitor stopped")
 }

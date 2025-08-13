@@ -34,11 +34,9 @@ WORKDIR /root/
 COPY --from=builder /app/monitor .
 COPY --from=builder /app/migrate .
 
-# Copy configuration files # todo probably remove
+# Copy configuration files and migrations
 COPY urls.yaml .
-
-# Create directory for logs # todo probably remove
-RUN mkdir -p /var/log/monitor
+COPY internal/migrations ./internal/migrations
 
 # Default command runs the monitor
 CMD ["./monitor"]

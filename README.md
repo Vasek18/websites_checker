@@ -9,103 +9,165 @@ A Go application that monitors multiple websites periodically, collecting metric
 - Optional regex pattern matching on response content
 - PostgreSQL database storage for check results
 - Graceful shutdown handling
-- No external dependencies except PostgreSQL driver
+- Docker Compose setup for easy local development
+- Versioned database migrations using golang-migrate
 
 ## Prerequisites
 
-- Go 1.21 or higher
-- PostgreSQL database
+- Docker and Docker Compose (recommended)
+- **OR** Go 1.21+ and PostgreSQL (for manual setup)
 
-## Installation
+## Quick Start with Docker Compose
 
-1. Clone or download the project
-2. Install dependencies:
+1. **Clone the repository**
    ```bash
-   go mod download
+   git clone <repository-url>
+   cd websites_checker
    ```
 
-## Configuration
-
-### Database Configuration
-
-1. Copy the example environment file:
-   ```bash
-   cp .env.example .env
-   ```
-
-2. Edit `.env` with your PostgreSQL connection details:
+2. **Configure database credentials**
+   
+   Edit `.env` file with your database settings:
    ```env
-   DB_HOST=localhost
+   DB_HOST=db
    DB_PORT=5432
+   DB_HOST_PORT=5432
    DB_USER=monitor_user
-   DB_PASSWORD=your_password_here
+   DB_PASSWORD=secret
    DB_NAME=monitor_db
    ```
 
-### URLs Configuration
+3. **Configure URLs to monitor**
+   
+   Edit `urls.yaml` with websites you want to monitor:
+   ```yaml
+   urls:
+     - url: "https://example.com"
+       interval: 60              # Check every 60 seconds
+       regex: "Example Domain"   # Optional: regex pattern to match in response
+     - url: "https://github.com"
+       interval: 120             # Check every 2 minutes
+     - url: "https://httpbin.org/status/200"
+       interval: 30              # Check every 30 seconds
+   ```
 
-Create a `urls.yaml` file in the project root with the websites you want to monitor:
+4. **Start the application**
+   ```bash
+   # Start PostgreSQL database
+   docker-compose up db -d
+   
+   # Run database migrations
+   docker-compose run --rm monitor ./migrate
+   
+   # Start the monitor
+   docker-compose up monitor
+   ```
 
-```yaml
-urls:
-  - url: "https://example.com"
-    interval: 60              # Check every 60 seconds
-    regex: "Example Domain"   # Optional: regex pattern to match in response
-  - url: "https://github.com"
-    interval: 120             # Check every 2 minutes
-    regex: "GitHub"
-  - url: "https://httpbin.org/status/200"
-    interval: 30              # Check every 30 seconds
-```
+   Or run everything at once:
+   ```bash
+   docker-compose up -d db
+   docker-compose run --rm monitor ./migrate
+   docker-compose up monitor
+   ```
 
-Alternatively, you can use JSON format (`urls.json`):
+5. **Stop the application**
+   ```bash
+   docker-compose down
+   ```
 
-```json
-{
-  "urls": [
-    {
-      "url": "https://example.com",
-      "interval": 60,
-      "regex": "Example Domain"
-    },
-    {
-      "url": "https://github.com",
-      "interval": 120,
-      "regex": "GitHub"
-    }
-  ]
-}
-```
+## Manual Setup (without Docker)
 
-## Database Setup
+### Prerequisites
+- Go 1.21 or higher
+- PostgreSQL database
 
-1. Create a PostgreSQL database and user
-2. Run database migrations:
+### Installation
+
+1. **Clone and install dependencies**
+   ```bash
+   git clone <repository-url>
+   cd websites_checker
+   go mod download
+   ```
+
+2. **Set up PostgreSQL database**
+   ```bash
+   # Create database and user
+   createdb monitor_db
+   createuser monitor_user
+   # Grant permissions as needed
+   ```
+
+3. **Set environment variables**
+   ```bash
+   export DB_HOST=localhost
+   export DB_PORT=5432
+   export DB_USER=monitor_user
+   export DB_PASSWORD=your_password_here
+   export DB_NAME=monitor_db
+   ```
+
+4. **Configure URLs to monitor**
+   
+   Create/edit `urls.yaml`:
+   ```yaml
+   urls:
+     - url: "https://example.com"
+       interval: 60              # Check every 60 seconds
+       regex: "Example Domain"   # Optional: regex pattern to match in response
+     - url: "https://github.com"
+       interval: 120             # Check every 2 minutes
+     - url: "https://httpbin.org/status/200"
+       interval: 30              # Check every 30 seconds
+   ```
+
+   Alternatively, you can use JSON format (`urls.json`):
+   ```json
+   {
+     "urls": [
+       {
+         "url": "https://example.com",
+         "interval": 60,
+         "regex": "Example Domain"
+       },
+       {
+         "url": "https://github.com",
+         "interval": 120,
+         "regex": "GitHub"
+       }
+     ]
+   }
+   ```
+
+5. **Run database migrations**
    ```bash
    go run ./cmd/migrate
    ```
 
-This will create the required tables:
-- `monitored_urls`: Stores URL configurations
-- `checks`: Stores check results with timestamps, response times, status codes, and errors
+6. **Start the monitor**
+   ```bash
+   go run ./cmd/monitor
+   ```
 
-## Running the Application
-
-Start the website monitor:
-```bash
-go run ./cmd/monitor
-```
-
-The application will:
-1. Load configuration from `.env` and `urls.yaml`
-2. Connect to the PostgreSQL database
-3. Start monitoring all configured URLs in separate goroutines
-4. Log check results and store them in the database
-5. Continue running until interrupted (Ctrl+C)
+   The application will:
+   - Load configuration from environment variables and `urls.yaml`
+   - Connect to the PostgreSQL database
+   - Start monitoring all configured URLs in separate goroutines
+   - Log check results and store them in the database
+   - Continue running until interrupted (Ctrl+C)
 
 ## Building
 
-To build the application:
+**For Docker deployment:**
+```bash
+# Build the Docker image
+docker-compose build
+
+# Or build manually
+docker build -t website-monitor .
+```
+
+**For manual deployment:**
 ```bash
 # Build monitor
 go build -o monitor ./cmd/monitor
@@ -169,16 +231,37 @@ The application logs:
 Project structure:
 ```
 ├── cmd/
-│   ├── monitor/main.go     # Main application
-│   └── migrate/main.go     # Database migration tool
+│   ├── monitor/main.go         # Main application
+│   └── migrate/main.go         # Database migration tool
 ├── internal/
-│   ├── config/             # Configuration loading
-│   ├── db/                 # Database operations
-│   ├── models/             # Data structures
-│   ├── repository/         # URL data sources
-│   ├── checker/            # HTTP checking logic
-│   └── scheduler/          # Goroutine-based scheduling
-├── urls.yaml               # URL configuration
-├── .env                    # Database configuration
+│   ├── config/                 # Configuration loading
+│   ├── db/                     # Database operations
+│   ├── migrations/             # SQL migration files
+│   │   ├── 000001_create_monitored_urls.up.sql
+│   │   ├── 000001_create_monitored_urls.down.sql
+│   │   ├── 000002_create_checks.up.sql
+│   │   └── 000002_create_checks.down.sql
+│   ├── models/                 # Data structures
+│   ├── repository/             # URL data sources
+│   ├── checker/                # HTTP checking logic
+│   └── scheduler/              # Goroutine-based scheduling
+├── urls.yaml                   # URL configuration
+├── docker-compose.yml          # Docker Compose setup
+├── Dockerfile                  # Docker image definition
 └── README.md
 ```
+
+## Environment Variables
+
+The application uses the following environment variables:
+
+| Variable | Description | Default | Required |
+|----------|-------------|---------|----------|
+| `DB_HOST` | PostgreSQL host | - | Yes |
+| `DB_PORT` | PostgreSQL port | - | Yes |
+| `DB_HOST_PORT` | Host port to expose PostgreSQL | - | Yes (Docker only) |
+| `DB_USER` | PostgreSQL username | - | Yes |
+| `DB_PASSWORD` | PostgreSQL password | - | Yes |
+| `DB_NAME` | PostgreSQL database name | - | Yes |
+
+In Docker Compose, these are automatically set in the `docker-compose.yml` file.
