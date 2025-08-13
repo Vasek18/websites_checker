@@ -37,42 +37,32 @@ A Go application that monitors multiple websites periodically, collecting metric
    DB_NAME=monitor_db
    ```
 
-3. **Configure URLs to monitor**
-   
-   Edit `urls.yaml` with websites you want to monitor:
-   ```yaml
-   urls:
-     - url: "https://example.com"
-       interval: 60              # Check every 60 seconds
-       regex: "Example Domain"   # Optional: regex pattern to match in response
-     - url: "https://github.com"
-       interval: 120             # Check every 2 minutes
-     - url: "https://httpbin.org/status/200"
-       interval: 30              # Check every 30 seconds
-   ```
-
-4. **Start the application**
+3. **Start the application**
    ```bash
    # Start PostgreSQL database
-   docker-compose up db -d
+   docker compose up db -d
    
    # Run database migrations
-   docker-compose run --rm monitor ./migrate
+   docker compose run --rm monitor ./migrate
+   
+   # Seed database with sample URLs
+   docker compose run --rm monitor ./seed
    
    # Start the monitor
-   docker-compose up monitor
+   docker compose up monitor
    ```
 
    Or run everything at once:
    ```bash
-   docker-compose up -d db
-   docker-compose run --rm monitor ./migrate
-   docker-compose up monitor
+   docker compose up -d db
+   docker compose run --rm monitor ./migrate
+   docker compose run --rm monitor ./seed
+   docker compose up monitor
    ```
 
-5. **Stop the application**
+4. **Stop the application**
    ```bash
-   docker-compose down
+   docker compose down
    ```
 
 ## Manual Setup (without Docker)
@@ -107,41 +97,14 @@ A Go application that monitors multiple websites periodically, collecting metric
    export DB_NAME=monitor_db
    ```
 
-4. **Configure URLs to monitor**
-   
-   Create/edit `urls.yaml`:
-   ```yaml
-   urls:
-     - url: "https://example.com"
-       interval: 60              # Check every 60 seconds
-       regex: "Example Domain"   # Optional: regex pattern to match in response
-     - url: "https://github.com"
-       interval: 120             # Check every 2 minutes
-     - url: "https://httpbin.org/status/200"
-       interval: 30              # Check every 30 seconds
-   ```
-
-   Alternatively, you can use JSON format (`urls.json`):
-   ```json
-   {
-     "urls": [
-       {
-         "url": "https://example.com",
-         "interval": 60,
-         "regex": "Example Domain"
-       },
-       {
-         "url": "https://github.com",
-         "interval": 120,
-         "regex": "GitHub"
-       }
-     ]
-   }
-   ```
-
-5. **Run database migrations**
+4. **Run database migrations**
    ```bash
    go run ./cmd/migrate
+   ```
+
+5. **Seed database with sample URLs**
+   ```bash
+   go run ./cmd/seed
    ```
 
 6. **Start the monitor**
@@ -150,8 +113,9 @@ A Go application that monitors multiple websites periodically, collecting metric
    ```
 
    The application will:
-   - Load configuration from environment variables and `urls.yaml`
+   - Load configuration from environment variables
    - Connect to the PostgreSQL database
+   - Load monitored URLs from the database
    - Start monitoring all configured URLs in separate goroutines
    - Log check results and store them in the database
    - Continue running until interrupted (Ctrl+C)
@@ -169,14 +133,14 @@ docker build -t website-monitor .
 
 **For manual deployment:**
 ```bash
-# Build monitor
+# Build all binaries
 go build -o monitor ./cmd/monitor
-
-# Build migration tool
 go build -o migrate ./cmd/migrate
+go build -o seed ./cmd/seed
 
 # Run built binaries
 ./migrate
+./seed
 ./monitor
 ```
 
@@ -232,7 +196,8 @@ Project structure:
 ```
 ├── cmd/
 │   ├── monitor/main.go         # Main application
-│   └── migrate/main.go         # Database migration tool
+│   ├── migrate/main.go         # Database migration tool
+│   └── seed/main.go            # Database seeding tool
 ├── internal/
 │   ├── config/                 # Configuration loading
 │   ├── db/                     # Database operations
@@ -242,10 +207,13 @@ Project structure:
 │   │   ├── 000002_create_checks.up.sql
 │   │   └── 000002_create_checks.down.sql
 │   ├── models/                 # Data structures
-│   ├── repository/             # URL data sources
+│   ├── repository/             # URL data sources (file & database)
+│   │   ├── repository.go       # Repository interface
+│   │   ├── file.go            # File-based repository (legacy)
+│   │   └── db.go              # Database repository
 │   ├── checker/                # HTTP checking logic
 │   └── scheduler/              # Goroutine-based scheduling
-├── urls.yaml                   # URL configuration
+├── .env                        # Environment variables for Docker
 ├── docker-compose.yml          # Docker Compose setup
 ├── Dockerfile                  # Docker image definition
 └── README.md

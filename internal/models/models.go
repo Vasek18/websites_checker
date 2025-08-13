@@ -24,7 +24,6 @@ type CheckResult struct {
 // Config represents the application configuration
 type Config struct {
 	Database DatabaseConfig `json:"database"`
-	URLs     []MonitoredURL `json:"urls"`
 }
 
 // DatabaseConfig holds database connection parameters

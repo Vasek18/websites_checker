@@ -30,10 +30,7 @@ func main() {
 	defer database.Close()
 
 	// Create repository
-	repo, err := repository.NewFileRepository()
-	if err != nil {
-		log.Fatalf("Failed to create repository: %v", err)
-	}
+	repo := repository.NewDBRepository(database)
 
 	// Create and start scheduler
 	sched := scheduler.New(repo, database)

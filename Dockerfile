@@ -22,6 +22,9 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o monitor ./cmd/mon
 # Build the migrate application
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o migrate ./cmd/migrate
 
+# Build the seed application
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o seed ./cmd/seed
+
 # Final stage
 FROM alpine:latest
 
@@ -33,9 +36,9 @@ WORKDIR /root/
 # Copy binaries from builder stage
 COPY --from=builder /app/monitor .
 COPY --from=builder /app/migrate .
+COPY --from=builder /app/seed .
 
-# Copy configuration files and migrations
-COPY urls.yaml .
+# Copy migrations
 COPY internal/migrations ./internal/migrations
 
 # Default command runs the monitor
