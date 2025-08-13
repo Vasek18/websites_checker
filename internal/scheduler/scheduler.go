@@ -1,0 +1,128 @@
+package scheduler
+
+import (
+	"context"
+	"log"
+	"sync"
+	"time"
+
+	"website-monitor/internal/checker"
+	"website-monitor/internal/db"
+	"website-monitor/internal/models"
+	"website-monitor/internal/repository"
+)
+
+// Scheduler manages the periodic checking of URLs
+type Scheduler struct {
+	repo    repository.URLRepository
+	db      *db.DB
+	checker *checker.HTTPChecker
+	cancel  context.CancelFunc
+	wg      sync.WaitGroup
+}
+
+// New creates a new scheduler
+func New(repo repository.URLRepository, database *db.DB) *Scheduler {
+	return &Scheduler{
+		repo:    repo,
+		db:      database,
+		checker: checker.NewHTTPChecker(),
+	}
+}
+
+// Start begins monitoring all URLs from the repository
+func (s *Scheduler) Start(ctx context.Context) error {
+	urls, err := s.repo.GetMonitoredURLs()
+	if err != nil {
+		return err
+	}
+
+	if len(urls) == 0 {
+		log.Println("No URLs to monitor")
+		return nil
+	}
+
+	// Create a context that we can cancel
+	ctx, s.cancel = context.WithCancel(ctx)
+
+	log.Printf("Starting monitoring for %d URLs", len(urls))
+
+	// Start a goroutine for each URL
+	for _, url := range urls {
+		s.wg.Add(1)
+		go s.monitorURL(ctx, url)
+	}
+
+	return nil
+}
+
+// Stop gracefully stops all monitoring goroutines
+func (s *Scheduler) Stop() {
+	if s.cancel != nil {
+		log.Println("Stopping scheduler...")
+		s.cancel()
+		s.wg.Wait()
+		log.Println("Scheduler stopped")
+	}
+}
+
+// monitorURL runs in a goroutine to monitor a single URL
+func (s *Scheduler) monitorURL(ctx context.Context, url models.MonitoredURL) {
+	defer s.wg.Done()
+
+	log.Printf("Starting monitoring for %s (interval: %d seconds)", url.URL, url.CheckIntervalSec)
+
+	ticker := time.NewTicker(time.Duration(url.CheckIntervalSec) * time.Second)
+	defer ticker.Stop()
+
+	// Perform an initial check
+	s.performCheck(url)
+
+	for {
+		select {
+		case <-ctx.Done():
+			log.Printf("Stopping monitoring for %s", url.URL)
+			return
+		case <-ticker.C:
+			s.performCheck(url)
+		}
+	}
+}
+
+// performCheck executes a single check for a URL and stores the result
+func (s *Scheduler) performCheck(url models.MonitoredURL) {
+	log.Printf("Checking %s", url.URL)
+	
+	result := s.checker.Check(url)
+	
+	// Log the result
+	if result.Error != "" {
+		log.Printf("Check failed for %s: %s", url.URL, result.Error)
+	} else {
+		status := "unknown"
+		if result.HTTPStatus != nil {
+			status = string(rune(*result.HTTPStatus))
+		}
+		responseTime := "unknown"
+		if result.ResponseTimeMs != nil {
+			responseTime = string(rune(*result.ResponseTimeMs)) + "ms"
+		}
+		
+		regexStatus := ""
+		if result.RegexMatch != nil {
+			if *result.RegexMatch {
+				regexStatus = ", regex: match"
+			} else {
+				regexStatus = ", regex: no match"
+			}
+		}
+		
+		log.Printf("Check successful for %s: status=%s, time=%s%s", 
+			url.URL, status, responseTime, regexStatus)
+	}
+	
+	// Store the result in the database
+	if err := s.db.InsertCheckResult(result); err != nil {
+		log.Printf("Failed to store check result for %s: %v", url.URL, err)
+	}
+}
