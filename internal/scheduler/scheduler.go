@@ -43,7 +43,8 @@ func (s *Scheduler) Start(ctx context.Context) error {
 		return nil
 	}
 
-	// Create a context that we can cancel // todo it's already context with cancel
+	// Wrap context with cancel to ensure Stop() can immediately signal all goroutines
+	// and wait for them to exit, preventing race conditions during shutdown
 	ctx, s.cancel = context.WithCancel(ctx)
 
 	log.Printf("Starting monitoring for %d URLs", len(urls))
