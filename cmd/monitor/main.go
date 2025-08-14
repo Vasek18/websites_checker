@@ -8,8 +8,8 @@ import (
 	"syscall"
 
 	"website-monitor/internal/db"
-	"website-monitor/internal/repository"
 	"website-monitor/internal/scheduler"
+	"website-monitor/internal/url_repository"
 )
 
 func main() {
@@ -23,7 +23,7 @@ func main() {
 	defer database.Close()
 
 	// Create repository
-	repo := repository.NewDBRepository(database)
+	repo := url_repository.New(database)
 
 	// Create and start scheduler
 	sched := scheduler.New(repo, database)

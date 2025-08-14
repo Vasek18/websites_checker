@@ -10,12 +10,12 @@ import (
 	"website-monitor/internal/checker"
 	"website-monitor/internal/db"
 	"website-monitor/internal/models"
-	"website-monitor/internal/repository"
+	"website-monitor/internal/url_repository"
 )
 
 // Scheduler manages the periodic checking of URLs
 type Scheduler struct {
-	repo    repository.UrlRepository
+	repo    url_repository.UrlRepository
 	db      *db.DB
 	checker *checker.HTTPChecker
 	cancel  context.CancelFunc
@@ -23,7 +23,7 @@ type Scheduler struct {
 }
 
 // New creates a new scheduler
-func New(repo repository.UrlRepository, database *db.DB) *Scheduler {
+func New(repo url_repository.UrlRepository, database *db.DB) *Scheduler {
 	return &Scheduler{
 		repo:    repo,
 		db:      database,

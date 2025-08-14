@@ -1,4 +1,4 @@
-package repository
+package url_repository
 
 import (
 	"fmt"
@@ -6,20 +6,20 @@ import (
 	"website-monitor/internal/models"
 )
 
-// DbRepository implements UrlRepository using database as the data source
-type DbRepository struct {
+// DbUrlRepository implements UrlRepository using database as the data source
+type DbUrlRepository struct {
 	db *db.DB
 }
 
-// NewDBRepository creates a new database-backed repository
-func NewDBRepository(database *db.DB) *DbRepository {
-	return &DbRepository{
+// New creates a new database-backed repository
+func New(database *db.DB) *DbUrlRepository {
+	return &DbUrlRepository{
 		db: database,
 	}
 }
 
 // GetMonitoredURLs returns all URLs that should be monitored from the database
-func (r *DbRepository) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
+func (r *DbUrlRepository) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
 	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls`
 
 	rows, err := r.db.Query(query)
