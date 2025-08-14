@@ -73,7 +73,7 @@ func (db *DB) InsertCheckResult(result models.CheckResult) error {
 	return nil
 }
 
-// UpsertMonitoredURL inserts or updates a monitored url
+// UpsertMonitoredURL inserts or updates a monitored url // todo extract to seeder file
 func (db *DB) UpsertMonitoredURL(url models.MonitoredUrl) error {
 	query := `
 		INSERT INTO monitored_urls (url, check_interval_sec, regex_pattern)
@@ -90,8 +90,8 @@ func (db *DB) UpsertMonitoredURL(url models.MonitoredUrl) error {
 	return nil
 }
 
-// GetMonitoredURLs retrieves all monitored URLs from the database
-func (db *DB) GetMonitoredURLs() ([]models.MonitoredUrl, error) {
+// GetMonitoredUrls retrieves all monitored URLs from the database
+func (db *DB) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
 	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls`
 
 	rows, err := db.conn.Query(query)

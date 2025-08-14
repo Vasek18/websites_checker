@@ -14,7 +14,7 @@ import (
 
 // Scheduler manages the periodic checking of URLs
 type Scheduler struct {
-	repo    repository.URLRepository
+	repo    repository.UrlRepository
 	db      *db.DB
 	checker *checker.HTTPChecker
 	cancel  context.CancelFunc
@@ -22,7 +22,7 @@ type Scheduler struct {
 }
 
 // New creates a new scheduler
-func New(repo repository.URLRepository, database *db.DB) *Scheduler {
+func New(repo repository.UrlRepository, database *db.DB) *Scheduler {
 	return &Scheduler{
 		repo:    repo,
 		db:      database,
@@ -32,7 +32,7 @@ func New(repo repository.URLRepository, database *db.DB) *Scheduler {
 
 // Start begins monitoring all URLs from the repository
 func (s *Scheduler) Start(ctx context.Context) error {
-	urls, err := s.repo.GetMonitoredURLs()
+	urls, err := s.repo.GetMonitoredUrls()
 	if err != nil {
 		return err
 	}

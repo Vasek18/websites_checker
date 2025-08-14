@@ -5,7 +5,7 @@ import (
 	"website-monitor/internal/models"
 )
 
-// DBRepository implements URLRepository using database as the data source
+// DBRepository implements UrlRepository using database as the data source
 type DBRepository struct { // todo DbRepository
 	db *db.DB
 }
@@ -18,6 +18,6 @@ func NewDBRepository(database *db.DB) *DBRepository {
 }
 
 // GetMonitoredURLs returns all URLs that should be monitored from the database
-func (r *DBRepository) GetMonitoredURLs() ([]models.MonitoredUrl, error) {
-	return r.db.GetMonitoredURLs()
+func (r *DBRepository) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
+	return r.db.GetMonitoredUrls()
 }
