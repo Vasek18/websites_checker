@@ -27,7 +27,7 @@ func New(repo repository.UrlRepository, database *db.DB) *Scheduler {
 	return &Scheduler{
 		repo:    repo,
 		db:      database,
-		checker: checker.NewHTTPChecker(),
+		checker: checker.New(database),
 	}
 }
 
@@ -121,7 +121,7 @@ func (s *Scheduler) performCheck(url models.MonitoredUrl) {
 	}
 
 	// Store the result in the database
-	if err := s.db.InsertCheckResult(result); err != nil {
+	if err := s.checker.InsertCheckResult(result); err != nil {
 		log.Printf("Failed to store check result for %s: %v", url.Url, err)
 	}
 }

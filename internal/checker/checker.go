@@ -17,8 +17,8 @@ type HTTPChecker struct {
 	db     *db.DB
 }
 
-// NewHTTPChecker creates a new HTTP checker with a configured client
-func NewHTTPChecker(database *db.DB) *HTTPChecker { // todo just New?
+// New creates a new HTTP checker with a configured client
+func New(database *db.DB) *HTTPChecker {
 	return &HTTPChecker{
 		client: &http.Client{
 			Timeout: 30 * time.Second, // todo should we have such constrain?

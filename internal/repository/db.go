@@ -7,7 +7,7 @@ import (
 )
 
 // DbRepository implements UrlRepository using database as the data source
-type DbRepository struct { // todo DbRepository
+type DbRepository struct {
 	db *db.DB
 }
 
