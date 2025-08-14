@@ -2,8 +2,8 @@ package repository
 
 import "website-monitor/internal/models"
 
-// URLRepository defines the interface for URL data sources
+// URLRepository defines the interface for url data sources
 type URLRepository interface {
 	// GetMonitoredURLs returns all URLs that should be monitored
-	GetMonitoredURLs() ([]models.MonitoredURL, error)
+	GetMonitoredURLs() ([]models.MonitoredUrl, error)
 }

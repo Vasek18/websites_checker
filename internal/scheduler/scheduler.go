@@ -47,10 +47,10 @@ func (s *Scheduler) Start(ctx context.Context) error {
 
 	log.Printf("Starting monitoring for %d URLs", len(urls))
 
-	// Start a goroutine for each URL
+	// Start a goroutine for each url
 	for _, url := range urls {
 		s.wg.Add(1)
-		go s.startMonitorURL(ctx, url)
+		go s.startMonitorUrl(ctx, url)
 	}
 
 	return nil
@@ -66,38 +66,36 @@ func (s *Scheduler) Stop() {
 	}
 }
 
-// startMonitorURL runs in a goroutine to monitor a single URL
-func (s *Scheduler) startMonitorURL(ctx context.Context, url models.MonitoredURL) { // todo startMonitorUrl
+// startMonitorUrl runs in a goroutine to monitor a single url
+func (s *Scheduler) startMonitorUrl(ctx context.Context, url models.MonitoredUrl) {
 	defer s.wg.Done()
 
-	log.Printf("Starting monitoring for %s (interval: %d seconds)", url.URL, url.CheckIntervalSec)
+	log.Printf("Starting monitoring for %s (interval: %d seconds)", url.Url, url.CheckIntervalSec)
 
 	ticker := time.NewTicker(time.Duration(url.CheckIntervalSec) * time.Second)
 	defer ticker.Stop()
 
-	// Perform an initial check
-	s.performCheck(url)
-
-	for {
+	for ; true; <-ticker.C {
 		select {
 		case <-ctx.Done():
-			log.Printf("Stopping monitoring for %s", url.URL)
+			log.Printf("Stopping monitoring for %s", url.Url)
 			return
-		case <-ticker.C:
-			s.performCheck(url)
+		default:
 		}
+
+		s.performCheck(url)
 	}
 }
 
-// performCheck executes a single check for a URL and stores the result
-func (s *Scheduler) performCheck(url models.MonitoredURL) {
-	log.Printf("Checking %s", url.URL)
+// performCheck executes a single check for a url and stores the result
+func (s *Scheduler) performCheck(url models.MonitoredUrl) {
+	log.Printf("Checking %s", url.Url)
 
 	result := s.checker.Check(url)
 
 	// Log the result
 	if result.Error != "" {
-		log.Printf("Check failed for %s: %s", url.URL, result.Error)
+		log.Printf("Check failed for %s: %s", url.Url, result.Error)
 	} else {
 		status := "unknown"
 		if result.HTTPStatus != nil {
@@ -118,11 +116,11 @@ func (s *Scheduler) performCheck(url models.MonitoredURL) {
 		}
 
 		log.Printf("Check successful for %s: status=%s, time=%s%s",
-			url.URL, status, responseTime, regexStatus)
+			url.Url, status, responseTime, regexStatus)
 	}
 
 	// Store the result in the database
 	if err := s.db.InsertCheckResult(result); err != nil {
-		log.Printf("Failed to store check result for %s: %v", url.URL, err)
+		log.Printf("Failed to store check result for %s: %v", url.Url, err)
 	}
 }

@@ -23,15 +23,15 @@ func NewHTTPChecker() *HTTPChecker { // todo just New?
 	}
 }
 
-// Check performs an HTTP check on the given URL and returns the result
-func (c *HTTPChecker) Check(url models.MonitoredURL) models.CheckResult {
+// Check performs an HTTP check on the given url and returns the result
+func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
 	result := models.CheckResult{
-		URL:            url.URL,
+		URL:            url.Url,
 		CheckTimestamp: time.Now(),
 	}
 
 	start := time.Now()
-	resp, err := c.client.Get(url.URL)
+	resp, err := c.client.Get(url.Url)
 	responseTime := int(time.Since(start).Milliseconds())
 	result.ResponseTimeMs = &responseTime
 

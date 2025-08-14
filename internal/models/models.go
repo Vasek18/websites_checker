@@ -2,23 +2,23 @@ package models
 
 import "time"
 
-// MonitoredURL represents a URL to be monitored
-type MonitoredURL struct {
-	ID                int    `json:"id"`
-	URL               string `json:"url"`
-	CheckIntervalSec  int    `json:"check_interval_sec"`
-	RegexPattern      string `json:"regex_pattern,omitempty"`
+// MonitoredUrl represents a url to be monitored
+type MonitoredUrl struct {
+	ID               int    `json:"id"`
+	Url              string `json:"url"`
+	CheckIntervalSec int    `json:"check_interval_sec"`
+	RegexPattern     string `json:"regex_pattern,omitempty"`
 }
 
 // CheckResult represents the result of a website check
 type CheckResult struct {
-	ID               int       `json:"id"`
-	URL              string    `json:"url"`
-	CheckTimestamp   time.Time `json:"check_timestamp"`
-	ResponseTimeMs   *int      `json:"response_time_ms,omitempty"`
-	HTTPStatus       *int      `json:"http_status,omitempty"`
-	RegexMatch       *bool     `json:"regex_match,omitempty"`
-	Error            string    `json:"error,omitempty"`
+	ID             int       `json:"id"`
+	URL            string    `json:"url"`
+	CheckTimestamp time.Time `json:"check_timestamp"`
+	ResponseTimeMs *int      `json:"response_time_ms,omitempty"`
+	HTTPStatus     *int      `json:"http_status,omitempty"`
+	RegexMatch     *bool     `json:"regex_match,omitempty"`
+	Error          string    `json:"error,omitempty"`
 }
 
 // Config represents the application configuration

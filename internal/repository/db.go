@@ -18,6 +18,6 @@ func NewDBRepository(database *db.DB) *DBRepository {
 }
 
 // GetMonitoredURLs returns all URLs that should be monitored from the database
-func (r *DBRepository) GetMonitoredURLs() ([]models.MonitoredURL, error) {
+func (r *DBRepository) GetMonitoredURLs() ([]models.MonitoredUrl, error) {
 	return r.db.GetMonitoredURLs()
 }

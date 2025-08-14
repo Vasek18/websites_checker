@@ -13,10 +13,10 @@ import (
 func main() {
 	log.Println("Running database migrations...")
 
-	// Get database URL for migrate
-	dbURL, err := db.GetURL()
+	// Get database url for migrate
+	dbURL, err := db.GetUrl()
 	if err != nil {
-		log.Fatalf("Failed to get database URL: %v", err)
+		log.Fatalf("Failed to get database url: %v", err)
 	}
 
 	// Create migrate instance

@@ -73,8 +73,8 @@ func (db *DB) InsertCheckResult(result models.CheckResult) error {
 	return nil
 }
 
-// UpsertMonitoredURL inserts or updates a monitored URL
-func (db *DB) UpsertMonitoredURL(url models.MonitoredURL) error {
+// UpsertMonitoredURL inserts or updates a monitored url
+func (db *DB) UpsertMonitoredURL(url models.MonitoredUrl) error {
 	query := `
 		INSERT INTO monitored_urls (url, check_interval_sec, regex_pattern)
 		VALUES ($1, $2, $3)
@@ -82,16 +82,16 @@ func (db *DB) UpsertMonitoredURL(url models.MonitoredURL) error {
 			check_interval_sec = EXCLUDED.check_interval_sec,
 			regex_pattern = EXCLUDED.regex_pattern`
 
-	_, err := db.conn.Exec(query, url.URL, url.CheckIntervalSec, url.RegexPattern)
+	_, err := db.conn.Exec(query, url.Url, url.CheckIntervalSec, url.RegexPattern)
 	if err != nil {
-		return fmt.Errorf("failed to upsert monitored URL: %w", err)
+		return fmt.Errorf("failed to upsert monitored Url: %w", err)
 	}
 
 	return nil
 }
 
 // GetMonitoredURLs retrieves all monitored URLs from the database
-func (db *DB) GetMonitoredURLs() ([]models.MonitoredURL, error) {
+func (db *DB) GetMonitoredURLs() ([]models.MonitoredUrl, error) {
 	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls`
 
 	rows, err := db.conn.Query(query)
@@ -100,24 +100,24 @@ func (db *DB) GetMonitoredURLs() ([]models.MonitoredURL, error) {
 	}
 	defer rows.Close()
 
-	var urls []models.MonitoredURL
+	var urls []models.MonitoredUrl
 	for rows.Next() {
-		var url models.MonitoredURL
-		if err := rows.Scan(&url.ID, &url.URL, &url.CheckIntervalSec, &url.RegexPattern); err != nil {
-			return nil, fmt.Errorf("failed to scan monitored URL: %w", err)
+		var url models.MonitoredUrl
+		if err := rows.Scan(&url.ID, &url.Url, &url.CheckIntervalSec, &url.RegexPattern); err != nil {
+			return nil, fmt.Errorf("failed to scan monitored url: %w", err)
 		}
 		urls = append(urls, url)
 	}
 
 	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating over monitored URLs: %w", err)
+		return nil, fmt.Errorf("error iterating over monitored urls: %w", err)
 	}
 
 	return urls, nil
 }
 
-// GetURL returns a database connection URL for migration tools
-func GetURL() (string, error) {
+// GetUrl returns a database connection url for migration tools
+func GetUrl() (string, error) {
 	cfg, err := config.Load()
 	if err != nil {
 		return "", fmt.Errorf("failed to load configuration: %w", err)
