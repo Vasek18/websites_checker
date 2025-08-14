@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -99,23 +100,23 @@ func (s *Scheduler) performCheck(url models.MonitoredUrl) {
 	} else {
 		status := "unknown"
 		if result.HTTPStatus != nil {
-			status = string(rune(*result.HTTPStatus))
+			status = fmt.Sprintf("%d", *result.HTTPStatus)
 		}
 		responseTime := "unknown"
 		if result.ResponseTimeMs != nil {
-			responseTime = string(rune(*result.ResponseTimeMs)) + "ms"
+			responseTime = fmt.Sprintf("%dms", *result.ResponseTimeMs)
 		}
 
-		regexStatus := ""
+		regexStatus := "not defined"
 		if result.RegexMatch != nil {
 			if *result.RegexMatch {
-				regexStatus = ", regex: match"
+				regexStatus = "match"
 			} else {
-				regexStatus = ", regex: no match"
+				regexStatus = "no match"
 			}
 		}
 
-		log.Printf("Check successful for %s: status=%s, time=%s%s",
+		log.Printf("Check successful for %s: status=%s, time=%s, regex: %s",
 			url.Url, status, responseTime, regexStatus)
 	}
 
