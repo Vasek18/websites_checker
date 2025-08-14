@@ -2,6 +2,7 @@ package checker
 
 import (
 	"fmt"
+	"io"
 	"net/http"
 	"regexp"
 	"time"
@@ -63,12 +64,11 @@ func (c *HTTPChecker) checkRegexPattern(resp *http.Response, pattern string) (bo
 		return false, fmt.Errorf("invalid regex pattern: %w", err)
 	}
 
-	// Read response body
-	buf := make([]byte, 4096) // Read first 4KB for regex matching
-	n, err := resp.Body.Read(buf)
-	if err != nil && n == 0 {
+	// Read response body (limit to 64KB for performance)
+	body, err := io.ReadAll(io.LimitReader(resp.Body, 64*1024))
+	if err != nil {
 		return false, fmt.Errorf("failed to read response body: %w", err)
 	}
 
-	return regex.Match(buf[:n]), nil
+	return regex.Match(body), nil
 }
