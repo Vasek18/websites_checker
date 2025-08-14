@@ -2,35 +2,22 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"log"
 
 	"github.com/golang-migrate/migrate/v4"
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
-	"website-monitor/internal/config"
 	"website-monitor/internal/db"
 )
 
 func main() {
 	log.Println("Running database migrations...")
 
-	// Load configuration
-	cfg, err := config.Load()
+	// Get database URL for migrate
+	dbURL, err := db.GetURL()
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		log.Fatalf("Failed to get database URL: %v", err)
 	}
-
-	// Connect to database
-	database, err := db.New(cfg.Database)
-	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-	defer database.Close()
-
-	// Create database URL for migrate
-	dbURL := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.Database.User, cfg.Database.Password, cfg.Database.Host, cfg.Database.Port, cfg.Database.Name)
 
 	// Create migrate instance
 	m, err := migrate.New("file://internal/migrations", dbURL)

@@ -6,6 +6,7 @@ import (
 	"log"
 
 	_ "github.com/lib/pq"
+	"website-monitor/internal/config"
 	"website-monitor/internal/models"
 )
 
@@ -14,10 +15,15 @@ type DB struct {
 	conn *sql.DB
 }
 
-// New creates a new database connection
-func New(config models.DatabaseConfig) (*DB, error) {
+// Connect creates a new database connection
+func Connect() (*DB, error) {
+	cfg, err := config.Load()
+	if err != nil {
+		return nil, fmt.Errorf("failed to load configuration: %w", err)
+	}
+
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		config.Host, config.Port, config.User, config.Password, config.Name)
+		cfg.Database.Host, cfg.Database.Port, cfg.Database.User, cfg.Database.Password, cfg.Database.Name)
 
 	conn, err := sql.Open("postgres", dsn)
 	if err != nil {
@@ -28,7 +34,7 @@ func New(config models.DatabaseConfig) (*DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Printf("Connected to database %s:%s/%s", config.Host, config.Port, config.Name)
+	log.Printf("Connected to database %s:%s/%s", cfg.Database.Host, cfg.Database.Port, cfg.Database.Name)
 
 	return &DB{conn: conn}, nil
 }
@@ -108,4 +114,15 @@ func (db *DB) GetMonitoredURLs() ([]models.MonitoredURL, error) {
 	}
 
 	return urls, nil
+}
+
+// GetURL returns a database connection URL for migration tools
+func GetURL() (string, error) {
+	cfg, err := config.Load()
+	if err != nil {
+		return "", fmt.Errorf("failed to load configuration: %w", err)
+	}
+
+	return fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.Database.User, cfg.Database.Password, cfg.Database.Host, cfg.Database.Port, cfg.Database.Name), nil
 }

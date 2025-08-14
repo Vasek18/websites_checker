@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"syscall"
 
-	"website-monitor/internal/config"
 	"website-monitor/internal/db"
 	"website-monitor/internal/repository"
 	"website-monitor/internal/scheduler"
@@ -16,14 +15,8 @@ import (
 func main() {
 	log.Println("Starting Website Monitor...")
 
-	// Load configuration
-	cfg, err := config.Load()
-	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
-	}
-
 	// Connect to database
-	database, err := db.New(cfg.Database)
+	database, err := db.Connect()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
