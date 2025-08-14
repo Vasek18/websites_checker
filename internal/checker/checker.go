@@ -7,20 +7,23 @@ import (
 	"regexp"
 	"time"
 
+	"website-monitor/internal/db"
 	"website-monitor/internal/models"
 )
 
 // HTTPChecker performs HTTP checks on URLs
 type HTTPChecker struct {
 	client *http.Client
+	db     *db.DB
 }
 
 // NewHTTPChecker creates a new HTTP checker with a configured client
-func NewHTTPChecker() *HTTPChecker { // todo just New?
+func NewHTTPChecker(database *db.DB) *HTTPChecker { // todo just New?
 	return &HTTPChecker{
 		client: &http.Client{
 			Timeout: 30 * time.Second, // todo should we have such constrain?
 		},
+		db: database,
 	}
 }
 
@@ -71,4 +74,25 @@ func (c *HTTPChecker) checkRegexPattern(resp *http.Response, pattern string) (bo
 	}
 
 	return regex.Match(body), nil
+}
+
+// InsertCheckResult inserts a check result into the database
+func (c *HTTPChecker) InsertCheckResult(result models.CheckResult) error {
+	query := `
+		INSERT INTO checks (url, check_timestamp, response_time_ms, http_status, regex_match, error)
+		VALUES ($1, $2, $3, $4, $5, $6)`
+
+	err := c.db.Exec(query,
+		result.URL,
+		result.CheckTimestamp,
+		result.ResponseTimeMs,
+		result.HTTPStatus,
+		result.RegexMatch,
+		result.Error)
+
+	if err != nil {
+		return fmt.Errorf("failed to insert check result: %w", err)
+	}
+
+	return nil
 }

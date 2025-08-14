@@ -7,7 +7,6 @@ import (
 
 	_ "github.com/lib/pq"
 	"website-monitor/internal/config"
-	"website-monitor/internal/models"
 )
 
 // DB wraps the database connection and provides methods for database operations
@@ -52,68 +51,22 @@ func (db *DB) DB() *sql.DB {
 	return db.conn
 }
 
-// InsertCheckResult inserts a check result into the database
-func (db *DB) InsertCheckResult(result models.CheckResult) error {
-	query := `
-		INSERT INTO checks (url, check_timestamp, response_time_ms, http_status, regex_match, error)
-		VALUES ($1, $2, $3, $4, $5, $6)`
-
-	_, err := db.conn.Exec(query,
-		result.URL,
-		result.CheckTimestamp,
-		result.ResponseTimeMs,
-		result.HTTPStatus,
-		result.RegexMatch,
-		result.Error)
-
+// Exec executes a query with parameters and returns an error if it fails
+func (db *DB) Exec(query string, args ...interface{}) error {
+	_, err := db.conn.Exec(query, args...)
 	if err != nil {
-		return fmt.Errorf("failed to insert check result: %w", err)
+		return fmt.Errorf("failed to execute query: %w", err)
 	}
-
 	return nil
 }
 
-// UpsertMonitoredURL inserts or updates a monitored url // todo extract to seeder file
-func (db *DB) UpsertMonitoredURL(url models.MonitoredUrl) error {
-	query := `
-		INSERT INTO monitored_urls (url, check_interval_sec, regex_pattern)
-		VALUES ($1, $2, $3)
-		ON CONFLICT (url) DO UPDATE SET
-			check_interval_sec = EXCLUDED.check_interval_sec,
-			regex_pattern = EXCLUDED.regex_pattern`
-
-	_, err := db.conn.Exec(query, url.Url, url.CheckIntervalSec, url.RegexPattern)
+// Query executes a query and returns rows
+func (db *DB) Query(query string, args ...interface{}) (*sql.Rows, error) {
+	rows, err := db.conn.Query(query, args...)
 	if err != nil {
-		return fmt.Errorf("failed to upsert monitored Url: %w", err)
+		return nil, fmt.Errorf("failed to execute query: %w", err)
 	}
-
-	return nil
-}
-
-// GetMonitoredUrls retrieves all monitored URLs from the database
-func (db *DB) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
-	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls`
-
-	rows, err := db.conn.Query(query)
-	if err != nil {
-		return nil, fmt.Errorf("failed to query monitored URLs: %w", err)
-	}
-	defer rows.Close()
-
-	var urls []models.MonitoredUrl
-	for rows.Next() {
-		var url models.MonitoredUrl
-		if err := rows.Scan(&url.ID, &url.Url, &url.CheckIntervalSec, &url.RegexPattern); err != nil {
-			return nil, fmt.Errorf("failed to scan monitored url: %w", err)
-		}
-		urls = append(urls, url)
-	}
-
-	if err := rows.Err(); err != nil {
-		return nil, fmt.Errorf("error iterating over monitored urls: %w", err)
-	}
-
-	return urls, nil
+	return rows, nil
 }
 
 // GetUrl returns a database connection url for migration tools

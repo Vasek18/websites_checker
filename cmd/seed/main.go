@@ -44,11 +44,28 @@ func main() {
 			CheckIntervalSec: 300,
 			RegexPattern:     "",
 		},
+		{
+			Url:              "https://9gag.com/",
+			CheckIntervalSec: 60,
+			RegexPattern:     "",
+		},
+		{
+			Url:              "https://jsonplaceholder.typicode.com/posts/1",
+			CheckIntervalSec: 75,
+			RegexPattern:     `"userId":\s*1`,
+		},
 	}
 
 	// Insert each url into the database
+	upsertQuery := `
+		INSERT INTO monitored_urls (url, check_interval_sec, regex_pattern)
+		VALUES ($1, $2, $3)
+		ON CONFLICT (url) DO UPDATE SET
+			check_interval_sec = EXCLUDED.check_interval_sec,
+			regex_pattern = EXCLUDED.regex_pattern`
+
 	for _, url := range mockURLs {
-		if err := database.UpsertMonitoredURL(url); err != nil {
+		if err := database.Exec(upsertQuery, url.Url, url.CheckIntervalSec, url.RegexPattern); err != nil {
 			log.Printf("Failed to insert url %s: %v", url.Url, err)
 		} else {
 			log.Printf("Successfully seeded url: %s (interval: %ds)", url.Url, url.CheckIntervalSec)
