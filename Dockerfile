@@ -1,4 +1,3 @@
-# Multi-stage build for Go application
 FROM golang:1.21-alpine AS builder
 
 # Install git and ca-certificates for dependency downloads

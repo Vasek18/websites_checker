@@ -13,20 +13,22 @@ import (
 func main() {
 	log.Println("Running database migrations...")
 
-	// Get database url for migrate
 	dbURL, err := db.GetUrl()
 	if err != nil {
 		log.Fatalf("Failed to get database url: %v", err)
 	}
 
-	// Create migrate instance
 	m, err := migrate.New("file://internal/migrations", dbURL)
 	if err != nil {
 		log.Fatalf("Could not create migrate instance: %v", err)
 	}
-	defer m.Close()
+	defer func(m *migrate.Migrate) {
+		err, _ := m.Close()
+		if err != nil {
+			log.Fatalf("Could not close migrate database: %v", err)
+		}
+	}(m)
 
-	// Run migrations
 	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		log.Fatalf("Could not run migrations: %v", err)
 	}

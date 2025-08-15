@@ -7,22 +7,26 @@ import (
 	"website-monitor/internal/models"
 )
 
+// todo remove the file in case of release
 func main() {
 	log.Println("Seeding database with mock URLs...")
 
-	// Connect to database
 	database, err := db.Connect()
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
-	defer database.Close()
+	defer func(database *db.DB) {
+		err := database.Close()
+		if err != nil {
+			log.Fatalf("Failed to close database connection: %v", err)
+		}
+	}(database)
 
-	// Define mock urls to seed
 	mockURLs := []models.MonitoredUrl{
 		{
 			Url:              "https://aiven.io/",
 			CheckIntervalSec: 5,
-			RegexPattern:     "Example Domain",
+			RegexPattern:     "",
 		},
 		{
 			Url:              "https://www.google.com",
@@ -56,7 +60,6 @@ func main() {
 		},
 	}
 
-	// Insert each url into the database
 	upsertQuery := `
 		INSERT INTO monitored_urls (url, check_interval_sec, regex_pattern)
 		VALUES ($1, $2, $3)
@@ -72,5 +75,5 @@ func main() {
 		}
 	}
 
-	log.Println("Database seeding completed successfully")
+	log.Println("Database seeding completed")
 }
