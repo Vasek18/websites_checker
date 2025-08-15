@@ -37,11 +37,11 @@ func TestHTTPChecker_Check_Success(t *testing.T) {
 		t.Errorf("Expected no error, got: %s", result.Error)
 	}
 
-	if result.HTTPStatus == nil || *result.HTTPStatus != 200 { // todo why pointer?
+	if result.HTTPStatus == nil || *result.HTTPStatus != 200 {
 		t.Errorf("Expected HTTP status 200, got %v", result.HTTPStatus)
 	}
 
-	if result.ResponseTimeMs == nil || *result.ResponseTimeMs < 0 { // todo why pointer?
+	if result.ResponseTimeMs == nil || *result.ResponseTimeMs < 0 {
 		t.Error("Expected response time to be set and positive")
 	}
 
@@ -74,7 +74,7 @@ func TestHTTPChecker_Check_WithRegexMatch(t *testing.T) {
 		t.Errorf("Expected no error, got: %s", result.Error)
 	}
 
-	if result.RegexMatch == nil || !*result.RegexMatch { // todo why pointer?
+	if result.RegexMatch == nil || !*result.RegexMatch {
 		t.Error("Expected regex to match")
 	}
 }
@@ -103,7 +103,7 @@ func TestHTTPChecker_Check_WithRegexNoMatch(t *testing.T) {
 		t.Errorf("Expected no error, got: %s", result.Error)
 	}
 
-	if result.RegexMatch == nil || *result.RegexMatch { // todo why pointer?
+	if result.RegexMatch == nil || *result.RegexMatch {
 		t.Error("Expected regex not to match")
 	}
 }

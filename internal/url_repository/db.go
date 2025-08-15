@@ -20,7 +20,7 @@ func New(database *db.DB) *DbUrlRepository {
 
 // GetMonitoredUrls returns all URLs that should be monitored from the database
 func (r *DbUrlRepository) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
-	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls` // todo why COALESCE
+	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls`
 
 	rows, err := r.db.Query(query)
 	if err != nil {
