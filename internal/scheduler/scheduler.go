@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"sync"
 	"time"
@@ -13,7 +12,6 @@ import (
 	"website-monitor/internal/url_repository"
 )
 
-// Scheduler manages the periodic checking of URLs
 type Scheduler struct {
 	repo    url_repository.UrlRepository
 	db      *db.DB
@@ -22,7 +20,6 @@ type Scheduler struct {
 	wg      sync.WaitGroup
 }
 
-// New creates a new scheduler
 func New(repo url_repository.UrlRepository, database *db.DB) *Scheduler {
 	return &Scheduler{
 		repo:    repo,
@@ -31,7 +28,7 @@ func New(repo url_repository.UrlRepository, database *db.DB) *Scheduler {
 	}
 }
 
-// Start begins monitoring all URLs from the repository
+// Start begins monitoring of all URLs from the repository
 func (s *Scheduler) Start(ctx context.Context) error {
 	urls, err := s.repo.GetMonitoredUrls()
 	if err != nil {
@@ -40,6 +37,7 @@ func (s *Scheduler) Start(ctx context.Context) error {
 
 	if len(urls) == 0 {
 		log.Println("No URLs to monitor")
+
 		return nil
 	}
 
@@ -47,9 +45,6 @@ func (s *Scheduler) Start(ctx context.Context) error {
 	// and wait for them to exit, preventing race conditions during shutdown
 	ctx, s.cancel = context.WithCancel(ctx)
 
-	log.Printf("Starting monitoring for %d URLs", len(urls))
-
-	// Start a goroutine for each url
 	for _, url := range urls {
 		s.wg.Add(1)
 		go s.startMonitorUrl(ctx, url)
@@ -81,6 +76,7 @@ func (s *Scheduler) startMonitorUrl(ctx context.Context, url models.MonitoredUrl
 		select {
 		case <-ctx.Done():
 			log.Printf("Stopping monitoring for %s", url.Url)
+
 			return
 		default:
 		}
@@ -95,33 +91,6 @@ func (s *Scheduler) performCheck(url models.MonitoredUrl) {
 
 	result := s.checker.Check(url)
 
-	// Log the result
-	if result.Error != "" {
-		log.Printf("Check failed for %s: %s", url.Url, result.Error)
-	} else {
-		status := "unknown"
-		if result.HTTPStatus != nil {
-			status = fmt.Sprintf("%d", *result.HTTPStatus)
-		}
-		responseTime := "unknown"
-		if result.ResponseTimeMs != nil {
-			responseTime = fmt.Sprintf("%dms", *result.ResponseTimeMs)
-		}
-
-		regexStatus := "not defined"
-		if result.RegexMatch != nil {
-			if *result.RegexMatch {
-				regexStatus = "match"
-			} else {
-				regexStatus = "no match"
-			}
-		}
-
-		log.Printf("Check successful for %s: status=%s, time=%s, regex: %s",
-			url.Url, status, responseTime, regexStatus)
-	}
-
-	// Store the result in the database
 	if err := s.checker.InsertCheckResult(result); err != nil {
 		log.Printf("Failed to store check result for %s: %v", url.Url, err)
 	}

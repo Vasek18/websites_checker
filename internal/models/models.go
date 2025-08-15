@@ -17,9 +17,9 @@ type CheckResult struct {
 	ID             int       `json:"id"`
 	URL            string    `json:"url"`
 	CheckTimestamp time.Time `json:"check_timestamp"`
-	ResponseTimeMs *int      `json:"response_time_ms,omitempty"`
-	HTTPStatus     *int      `json:"http_status,omitempty"`
-	RegexMatch     *bool     `json:"regex_match,omitempty"`
+	ResponseTimeMs *int      `json:"response_time_ms,omitempty"` // todo why pointer?
+	HTTPStatus     *int      `json:"http_status,omitempty"`      // todo why pointer?
+	RegexMatch     *bool     `json:"regex_match,omitempty"`      // todo why pointer?
 	Error          string    `json:"error,omitempty"`
 }
 

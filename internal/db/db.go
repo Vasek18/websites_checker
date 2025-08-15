@@ -3,13 +3,10 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
-
 	_ "github.com/lib/pq"
 	"website-monitor/internal/config"
 )
 
-// DB wraps the database connection and provides methods for database operations
 type DB struct {
 	conn *sql.DB
 }
@@ -33,8 +30,6 @@ func Connect() (*DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
-	log.Printf("Connected to database %s:%s/%s", cfg.Database.Host, cfg.Database.Port, cfg.Database.Name)
-
 	return &DB{conn: conn}, nil
 }
 
@@ -44,11 +39,6 @@ func (db *DB) Close() error {
 		return db.conn.Close()
 	}
 	return nil
-}
-
-// DB returns the underlying *sql.DB connection
-func (db *DB) DB() *sql.DB {
-	return db.conn
 }
 
 // Exec executes a query with parameters and returns an error if it fails

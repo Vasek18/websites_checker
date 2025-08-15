@@ -11,7 +11,6 @@ import (
 	"website-monitor/internal/models"
 )
 
-// HTTPChecker performs HTTP checks on URLs
 type HTTPChecker struct {
 	client *http.Client
 	db     *db.DB
@@ -21,7 +20,7 @@ type HTTPChecker struct {
 func New(database *db.DB) *HTTPChecker {
 	return &HTTPChecker{
 		client: &http.Client{
-			Timeout: 30 * time.Second, // todo should we have such constrain?
+			Timeout: 30 * time.Second,
 		},
 		db: database,
 	}
@@ -41,19 +40,22 @@ func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
 
 	if err != nil {
 		result.Error = err.Error()
+
 		return result
 	}
-	defer resp.Body.Close()
+	defer func(Body io.ReadCloser) { // todo should be before the error return?
+		_ = Body.Close()
+	}(resp.Body)
 
 	result.HTTPStatus = &resp.StatusCode
 
-	// Check regex pattern if provided
+	// Check a regexp pattern if provided
 	if url.RegexPattern != "" {
 		regexMatch, err := c.checkRegexPattern(resp, url.RegexPattern)
 		if err != nil {
 			result.Error = fmt.Sprintf("regex check failed: %s", err.Error())
 		} else {
-			result.RegexMatch = &regexMatch
+			result.RegexMatch = &regexMatch // todo why pointer?
 		}
 	}
 

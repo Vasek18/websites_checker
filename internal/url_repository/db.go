@@ -1,6 +1,7 @@
 package url_repository
 
 import (
+	"database/sql"
 	"fmt"
 	"website-monitor/internal/db"
 	"website-monitor/internal/models"
@@ -11,22 +12,23 @@ type DbUrlRepository struct {
 	db *db.DB
 }
 
-// New creates a new database-backed repository
 func New(database *db.DB) *DbUrlRepository {
 	return &DbUrlRepository{
 		db: database,
 	}
 }
 
-// GetMonitoredURLs returns all URLs that should be monitored from the database
+// GetMonitoredUrls returns all URLs that should be monitored from the database
 func (r *DbUrlRepository) GetMonitoredUrls() ([]models.MonitoredUrl, error) {
-	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls`
+	query := `SELECT id, url, check_interval_sec, COALESCE(regex_pattern, '') FROM monitored_urls` // todo why COALESCE
 
 	rows, err := r.db.Query(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to query monitored URLs: %w", err)
 	}
-	defer rows.Close()
+	defer func(rows *sql.Rows) {
+		_ = rows.Close()
+	}(rows)
 
 	var urls []models.MonitoredUrl
 	for rows.Next() {

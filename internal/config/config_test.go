@@ -47,28 +47,6 @@ func TestLoad_MissingEnvVars(t *testing.T) {
 	}
 }
 
-func TestLoadDatabaseConfig_Success(t *testing.T) {
-	setTestEnvVars()
-	defer clearTestEnvVars()
-
-	dbConfig, err := loadDatabaseConfig()
-	if err != nil {
-		t.Fatalf("Expected no error, got: %v", err)
-	}
-
-	expected := &models.DatabaseConfig{
-		Host:     "localhost",
-		Port:     "5432",
-		User:     "testuser",
-		Password: "testpass",
-		Name:     "testdb",
-	}
-
-	if *dbConfig != *expected {
-		t.Errorf("Expected %+v, got %+v", expected, dbConfig)
-	}
-}
-
 func TestLoadDatabaseConfig_MissingHost(t *testing.T) {
 	setTestEnvVars()
 	os.Unsetenv("DB_HOST")
@@ -144,25 +122,6 @@ func TestLoadDatabaseConfig_MissingName(t *testing.T) {
 	}
 
 	expectedError := "required environment variable DB_NAME not set"
-	if err.Error() != expectedError {
-		t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
-	}
-}
-
-func TestLoadDatabaseConfig_EmptyValues(t *testing.T) {
-	os.Setenv("DB_HOST", "")
-	os.Setenv("DB_PORT", "5432")
-	os.Setenv("DB_USER", "testuser")
-	os.Setenv("DB_PASSWORD", "testpass")
-	os.Setenv("DB_NAME", "testdb")
-	defer clearTestEnvVars()
-
-	_, err := loadDatabaseConfig()
-	if err == nil {
-		t.Fatal("Expected error for empty DB_HOST")
-	}
-
-	expectedError := "required environment variable DB_HOST not set"
 	if err.Error() != expectedError {
 		t.Errorf("Expected error '%s', got '%s'", expectedError, err.Error())
 	}

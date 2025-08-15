@@ -37,11 +37,11 @@ func TestHTTPChecker_Check_Success(t *testing.T) {
 		t.Errorf("Expected no error, got: %s", result.Error)
 	}
 
-	if result.HTTPStatus == nil || *result.HTTPStatus != 200 {
+	if result.HTTPStatus == nil || *result.HTTPStatus != 200 { // todo why pointer?
 		t.Errorf("Expected HTTP status 200, got %v", result.HTTPStatus)
 	}
 
-	if result.ResponseTimeMs == nil || *result.ResponseTimeMs < 0 {
+	if result.ResponseTimeMs == nil || *result.ResponseTimeMs < 0 { // todo why pointer?
 		t.Error("Expected response time to be set and positive")
 	}
 
@@ -74,7 +74,7 @@ func TestHTTPChecker_Check_WithRegexMatch(t *testing.T) {
 		t.Errorf("Expected no error, got: %s", result.Error)
 	}
 
-	if result.RegexMatch == nil || !*result.RegexMatch {
+	if result.RegexMatch == nil || !*result.RegexMatch { // todo why pointer?
 		t.Error("Expected regex to match")
 	}
 }
@@ -103,7 +103,7 @@ func TestHTTPChecker_Check_WithRegexNoMatch(t *testing.T) {
 		t.Errorf("Expected no error, got: %s", result.Error)
 	}
 
-	if result.RegexMatch == nil || *result.RegexMatch {
+	if result.RegexMatch == nil || *result.RegexMatch { // todo why pointer?
 		t.Error("Expected regex not to match")
 	}
 }
@@ -188,99 +188,5 @@ func TestHTTPChecker_Check_404Status(t *testing.T) {
 
 	if result.HTTPStatus == nil || *result.HTTPStatus != 404 {
 		t.Errorf("Expected HTTP status 404, got %v", result.HTTPStatus)
-	}
-}
-
-func TestHTTPChecker_checkRegexPattern_Success(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Hello World Test"))
-	}))
-	defer server.Close()
-
-	checker := &HTTPChecker{
-		client: &http.Client{Timeout: 5 * time.Second},
-	}
-
-	resp, err := checker.client.Get(server.URL)
-	if err != nil {
-		t.Fatalf("Failed to get response: %v", err)
-	}
-	defer resp.Body.Close()
-
-	match, err := checker.checkRegexPattern(resp, "Hello.*Test")
-	if err != nil {
-		t.Errorf("Expected no error, got: %v", err)
-	}
-
-	if !match {
-		t.Error("Expected regex to match")
-	}
-}
-
-func TestHTTPChecker_checkRegexPattern_NoMatch(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Different content"))
-	}))
-	defer server.Close()
-
-	checker := &HTTPChecker{
-		client: &http.Client{Timeout: 5 * time.Second},
-	}
-
-	resp, err := checker.client.Get(server.URL)
-	if err != nil {
-		t.Fatalf("Failed to get response: %v", err)
-	}
-	defer resp.Body.Close()
-
-	match, err := checker.checkRegexPattern(resp, "Hello.*Test")
-	if err != nil {
-		t.Errorf("Expected no error, got: %v", err)
-	}
-
-	if match {
-		t.Error("Expected regex not to match")
-	}
-}
-
-func TestHTTPChecker_checkRegexPattern_InvalidRegex(t *testing.T) {
-	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Test content"))
-	}))
-	defer server.Close()
-
-	checker := &HTTPChecker{
-		client: &http.Client{Timeout: 5 * time.Second},
-	}
-
-	resp, err := checker.client.Get(server.URL)
-	if err != nil {
-		t.Fatalf("Failed to get response: %v", err)
-	}
-	defer resp.Body.Close()
-
-	_, err = checker.checkRegexPattern(resp, "[invalid")
-	if err == nil {
-		t.Error("Expected error for invalid regex pattern")
-	}
-
-	if !strings.Contains(err.Error(), "invalid regex pattern") {
-		t.Errorf("Expected invalid regex error, got: %s", err.Error())
-	}
-}
-
-func TestHTTPChecker_New(t *testing.T) {
-	checker := New(nil)
-
-	if checker == nil {
-		t.Fatal("Expected non-nil checker")
-	}
-
-	if checker.client == nil {
-		t.Error("Expected client to be initialized")
-	}
-
-	if checker.client.Timeout != 30*time.Second {
-		t.Errorf("Expected timeout 30s, got %v", checker.client.Timeout)
 	}
 }

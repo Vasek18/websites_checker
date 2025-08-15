@@ -9,7 +9,6 @@ import (
 
 // Load loads configuration from environment variables
 func Load() (*models.Config, error) {
-	// Load database configuration from environment variables
 	dbConfig, err := loadDatabaseConfig()
 	if err != nil {
 		return nil, fmt.Errorf("failed to load database config: %w", err)
@@ -22,7 +21,6 @@ func Load() (*models.Config, error) {
 
 // loadDatabaseConfig loads database configuration from environment variables
 func loadDatabaseConfig() (*models.DatabaseConfig, error) {
-	// Get required environment variables
 	host := os.Getenv("DB_HOST")
 	port := os.Getenv("DB_PORT")
 	user := os.Getenv("DB_USER")

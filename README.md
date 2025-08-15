@@ -34,6 +34,11 @@
 I would store urls in the database because to iterate over something periodically, it should be stored persistently. We also could use some kind of file storage, e.g., json or yaml config, but updating big formatted files is error-prone. Also with a database, we can introduce pagination when the list becomes too big, to avoid loading it all into the memory.
 However I introduced the repository pattern here, so the storage mechanism can be easily replaced in the future.
 
+## Checks
+
+- For the check there is a timeout of 30 seconds.
+- The regexp is checked against first 64KB of the page
+
 ## Environment Variables
 
 The application uses the following environment variables:

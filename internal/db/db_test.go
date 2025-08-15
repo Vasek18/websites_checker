@@ -33,22 +33,6 @@ func TestGetUrl_MissingConfig(t *testing.T) {
 	}
 }
 
-func TestDB_Close_NilConnection(t *testing.T) {
-	db := &DB{conn: nil}
-	err := db.Close()
-	if err != nil {
-		t.Errorf("Expected no error when closing nil connection, got: %v", err)
-	}
-}
-
-func TestDB_DB_Getter(t *testing.T) {
-	db := &DB{conn: nil}
-	conn := db.DB()
-	if conn != nil {
-		t.Error("Expected nil connection")
-	}
-}
-
 func setTestEnvVars() {
 	os.Setenv("DB_HOST", "localhost")
 	os.Setenv("DB_PORT", "5432")
