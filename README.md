@@ -190,6 +190,66 @@ The application logs:
 - **Raw SQL**: Uses `database/sql` with PostgreSQL driver, no ORM
 - **Standard Library**: Minimal external dependencies
 
+## Testing
+
+The project includes comprehensive unit tests for all internal packages.
+
+### Running Tests
+
+**Run all tests:**
+```bash
+go test ./internal/...
+```
+
+**Run tests with verbose output:**
+```bash
+go test -v ./internal/...
+```
+
+**Run tests with coverage:**
+```bash
+go test -cover ./internal/...
+```
+
+**Run tests for specific package:**
+```bash
+go test ./internal/config
+go test ./internal/checker
+go test ./internal/models
+```
+
+**Run specific test function:**
+```bash
+go test -run TestHTTPChecker_Check_Success ./internal/checker
+```
+
+**Generate detailed coverage report:**
+```bash
+go test -coverprofile=coverage.out ./internal/...
+go tool cover -html=coverage.out
+```
+
+The last command generates an HTML coverage report you can open in your browser.
+
+### Test Coverage
+
+- **config**: 100% coverage - Environment variable loading and validation
+- **checker**: 79.3% coverage - HTTP checking, regex matching, error handling
+- **models**: No statements to cover - Pure data structures with JSON marshaling tests
+- **db**: 25.9% coverage - Database connection and URL generation
+- **scheduler**: 17.8% coverage - Goroutine management and graceful shutdown
+- **url_repository**: 6.7% coverage - Repository pattern implementation
+
+### Test Features
+
+- **Mock implementations** for testing without real database connections
+- **HTTP test servers** for safe HTTP functionality testing
+- **Environment variable management** with proper cleanup
+- **Error scenario testing** including network failures and invalid inputs
+- **Interface compliance verification**
+- **JSON serialization testing** for data models
+- **Concurrent execution safety** testing
+
 ## Development
 
 Project structure:

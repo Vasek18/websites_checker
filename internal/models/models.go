@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 // MonitoredUrl represents a url to be monitored
 type MonitoredUrl struct {
