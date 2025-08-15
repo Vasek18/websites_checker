@@ -43,7 +43,8 @@ func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
 
 		return result
 	}
-	defer func(Body io.ReadCloser) { // todo should be before the error return?
+
+	defer func(Body io.ReadCloser) {
 		_ = Body.Close()
 	}(resp.Body)
 
@@ -55,7 +56,7 @@ func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
 		if err != nil {
 			result.Error = fmt.Sprintf("regex check failed: %s", err.Error())
 		} else {
-			result.RegexMatch = &regexMatch // todo why pointer?
+			result.RegexMatch = &regexMatch
 		}
 	}
 
@@ -64,7 +65,7 @@ func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
 
 // checkRegexPattern checks if the response body matches the given regex pattern
 func (c *HTTPChecker) checkRegexPattern(resp *http.Response, pattern string) (bool, error) {
-	regex, err := regexp.Compile(pattern) // todo safe?
+	regex, err := regexp.Compile(pattern)
 	if err != nil {
 		return false, fmt.Errorf("invalid regex pattern: %w", err)
 	}
