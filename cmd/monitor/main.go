@@ -92,7 +92,7 @@ func waitForShutdown(cancel context.CancelFunc, sched *scheduler.Scheduler) erro
 	return performGracefulShutdown(cancel, sched)
 }
 
-// Stoppable is introduced for testability
+// Stoppable is introduced for testability // todo to move closer to scheduler
 type Stoppable interface {
 	Stop()
 }

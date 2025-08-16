@@ -2,19 +2,23 @@
 
 1. **Configure database credentials**
 
-   Create `.env` file with your settings (feel free to change):
+   Create `.env` file with your settings:
    ```env
-   DB_HOST=db
+   # Required
+   DB_HOST=your-aiven-host.com  # or 'db' for local Docker
    DB_PORT=5432
-   DB_HOST_PORT=5432
    DB_USER=monitor_user
    DB_PASSWORD=secret
    DB_NAME=monitor_db
+   
+   # Optional
+   DB_HOST_PORT=5432          # Only needed for Docker (defaults to 5432)
+   DB_SSL_MODE=require        # Use 'require' for Aiven, 'disable' for local
    ```
 
 2. **Start the application**
    ```bash
-   # Start PostgreSQL database
+   # Start PostgreSQL database (if you want to use local DB)
    docker compose up db -d
    
    # Run database migrations
@@ -26,7 +30,9 @@
    # Start the monitor
    docker compose up monitor
    ```
-   
+
+# Production Setup
+
 # Technical Decisions
 
 ## URLs List
@@ -41,16 +47,15 @@ However, I introduced the repository pattern here, so the storage mechanism can 
 
 ## Environment Variables
 
-The application uses the following environment variables:
-
-| Variable | Description |
-|----------|-------------|
-| `DB_HOST` | PostgreSQL host |
-| `DB_PORT` | PostgreSQL port |
-| `DB_HOST_PORT` | Host port to expose PostgreSQL |
-| `DB_USER` | PostgreSQL username |
-| `DB_PASSWORD` | PostgreSQL password |
-| `DB_NAME` | PostgreSQL database name |
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `DB_HOST` | Yes | PostgreSQL host (e.g., Aiven host or `db` for Docker) |
+| `DB_PORT` | Yes | PostgreSQL port |
+| `DB_USER` | Yes | PostgreSQL username |
+| `DB_PASSWORD` | Yes | PostgreSQL password |
+| `DB_NAME` | Yes | PostgreSQL database name |
+| `DB_HOST_PORT` | No | Host port to expose PostgreSQL (Docker only, defaults to 5432) |
+| `DB_SSL_MODE` | No | SSL mode (`disable`, `require`, `prefer`, etc.) - defaults to `require` |
 
 ## Graceful Shutdown
 

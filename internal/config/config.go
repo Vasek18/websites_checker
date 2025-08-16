@@ -26,6 +26,12 @@ func loadDatabaseConfig() (*models.DatabaseConfig, error) {
 	user := os.Getenv("DB_USER")
 	password := os.Getenv("DB_PASSWORD")
 	name := os.Getenv("DB_NAME")
+	sslMode := os.Getenv("DB_SSL_MODE")
+
+	// Set default SSL mode if not specified
+	if sslMode == "" {
+		sslMode = "require"
+	}
 
 	// Validate required environment variables
 	required := map[string]string{
@@ -48,5 +54,6 @@ func loadDatabaseConfig() (*models.DatabaseConfig, error) {
 		User:     user,
 		Password: password,
 		Name:     name,
+		SSLMode:  sslMode,
 	}, nil
 }
