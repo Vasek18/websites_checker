@@ -57,7 +57,6 @@ The application uses the following environment variables:
 The application handles `SIGINT` and `SIGTERM` signals for graceful shutdown:
 - Stops all monitoring goroutines
 - Waits for in-flight checks to complete
-- Closes database connections // todo I doubt it
 
 ## Migrations
 
