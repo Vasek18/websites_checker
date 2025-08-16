@@ -8,7 +8,7 @@
    DB_HOST=your-aiven-host.com  # or 'db' for local Docker
    DB_PORT=5432
    DB_USER=monitor_user
-   DB_PASSWORD=secret
+   DB_PASSWORD=monitor_password
    DB_NAME=monitor_db
    
    # Optional
@@ -32,6 +32,16 @@
    ```
 
 # Production Setup
+
+**Configure environment variables**
+   ```env
+   DB_HOST=your-project-name.aivencloud.com
+   DB_PORT=12345
+   DB_USER=avnadmin
+   DB_PASSWORD=your-aiven-password
+   DB_NAME=defaultdb
+   DB_SSL_MODE=require
+   ```
 
 # Technical Decisions
 
