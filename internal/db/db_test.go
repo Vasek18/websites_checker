@@ -14,7 +14,7 @@ func TestGetUrl_Success(t *testing.T) {
 		t.Fatalf("Expected no error, got: %v", err)
 	}
 
-	expectedURL := "postgres://testuser:testpass@localhost:5432/testdb?sslmode=disable"
+	expectedURL := "postgres://testuser:testpass@localhost:5432/testdb?sslmode=require"
 	if url != expectedURL {
 		t.Errorf("Expected URL %s, got %s", expectedURL, url)
 	}

@@ -26,6 +26,7 @@ func TestLoad_Success(t *testing.T) {
 			User:     "testuser",
 			Password: "testpass",
 			Name:     "testdb",
+			SSLMode:  "require",
 		},
 	}
 
