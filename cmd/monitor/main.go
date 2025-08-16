@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"syscall"
 
+	"website-monitor/internal/checker"
 	"website-monitor/internal/db"
 	"website-monitor/internal/scheduler"
 	"website-monitor/internal/url_repository"
@@ -58,7 +59,8 @@ func connectToDatabase() (*db.DB, error) {
 
 func setupScheduler(database *db.DB) (*scheduler.Scheduler, context.CancelFunc, error) {
 	repo := url_repository.New(database)
-	sched := scheduler.New(repo, database)
+	chk := checker.New(database)
+	sched := scheduler.New(repo, database, chk)
 
 	// Create context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())

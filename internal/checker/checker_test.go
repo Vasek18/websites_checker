@@ -17,7 +17,7 @@ func TestHTTPChecker_Check_Success(t *testing.T) {
 	}))
 	defer server.Close()
 
-	checker := &HTTPChecker{
+	checker := &Checker{
 		client: &http.Client{Timeout: 5 * time.Second},
 	}
 
@@ -57,7 +57,7 @@ func TestHTTPChecker_Check_WithRegexMatch(t *testing.T) {
 	}))
 	defer server.Close()
 
-	checker := &HTTPChecker{
+	checker := &Checker{
 		client: &http.Client{Timeout: 5 * time.Second},
 	}
 
@@ -86,7 +86,7 @@ func TestHTTPChecker_Check_WithRegexNoMatch(t *testing.T) {
 	}))
 	defer server.Close()
 
-	checker := &HTTPChecker{
+	checker := &Checker{
 		client: &http.Client{Timeout: 5 * time.Second},
 	}
 
@@ -115,7 +115,7 @@ func TestHTTPChecker_Check_InvalidRegex(t *testing.T) {
 	}))
 	defer server.Close()
 
-	checker := &HTTPChecker{
+	checker := &Checker{
 		client: &http.Client{Timeout: 5 * time.Second},
 	}
 
@@ -138,7 +138,7 @@ func TestHTTPChecker_Check_InvalidRegex(t *testing.T) {
 }
 
 func TestHTTPChecker_Check_HTTPError(t *testing.T) {
-	checker := &HTTPChecker{
+	checker := &Checker{
 		client: &http.Client{Timeout: 1 * time.Millisecond},
 	}
 
@@ -170,7 +170,7 @@ func TestHTTPChecker_Check_404Status(t *testing.T) {
 	}))
 	defer server.Close()
 
-	checker := &HTTPChecker{
+	checker := &Checker{
 		client: &http.Client{Timeout: 5 * time.Second},
 	}
 

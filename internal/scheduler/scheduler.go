@@ -15,16 +15,16 @@ import (
 type Scheduler struct {
 	repo    url_repository.UrlRepository
 	db      *db.DB
-	checker *checker.HTTPChecker
+	checker checker.IChecker
 	cancel  context.CancelFunc
 	wg      sync.WaitGroup
 }
 
-func New(repo url_repository.UrlRepository, database *db.DB) *Scheduler {
+func New(repo url_repository.UrlRepository, database *db.DB, chk checker.IChecker) *Scheduler {
 	return &Scheduler{
 		repo:    repo,
 		db:      database,
-		checker: checker.New(database),
+		checker: chk,
 	}
 }
 

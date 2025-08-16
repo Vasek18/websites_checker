@@ -11,14 +11,20 @@ import (
 	"website-monitor/internal/models"
 )
 
-type HTTPChecker struct {
+// IChecker defines the interface for performing HTTP checks
+type IChecker interface {
+	Check(url models.MonitoredUrl) models.CheckResult
+	InsertCheckResult(result models.CheckResult) error
+}
+
+type Checker struct {
 	client *http.Client
 	db     *db.DB
 }
 
 // New creates a new HTTP checker with a configured client
-func New(database *db.DB) *HTTPChecker {
-	return &HTTPChecker{
+func New(database *db.DB) *Checker {
+	return &Checker{
 		client: &http.Client{
 			Timeout: 30 * time.Second,
 		},
@@ -27,7 +33,7 @@ func New(database *db.DB) *HTTPChecker {
 }
 
 // Check performs an HTTP check on the given url and returns the result
-func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
+func (c *Checker) Check(url models.MonitoredUrl) models.CheckResult {
 	result := models.CheckResult{
 		URL:            url.Url,
 		CheckTimestamp: time.Now(),
@@ -64,7 +70,7 @@ func (c *HTTPChecker) Check(url models.MonitoredUrl) models.CheckResult {
 }
 
 // checkRegexPattern checks if the response body matches the given regex pattern
-func (c *HTTPChecker) checkRegexPattern(resp *http.Response, pattern string) (bool, error) {
+func (c *Checker) checkRegexPattern(resp *http.Response, pattern string) (bool, error) {
 	regex, err := regexp.Compile(pattern)
 	if err != nil {
 		return false, fmt.Errorf("invalid regex pattern: %w", err)
@@ -80,7 +86,7 @@ func (c *HTTPChecker) checkRegexPattern(resp *http.Response, pattern string) (bo
 }
 
 // InsertCheckResult inserts a check result into the database
-func (c *HTTPChecker) InsertCheckResult(result models.CheckResult) error {
+func (c *Checker) InsertCheckResult(result models.CheckResult) error {
 	query := `
 		INSERT INTO checks (url, check_timestamp, response_time_ms, http_status, regex_match, error)
 		VALUES ($1, $2, $3, $4, $5, $6)`
