@@ -1,4 +1,4 @@
-# Quick Start on local
+# Local Quick Start
 
 1. **Configure database credentials**
 
@@ -27,17 +27,17 @@
    docker compose up monitor
    ```
    
-# Technical decisions
+# Technical Decisions
 
-## Urls list
+## URLs List
 
-I would store urls in the database because to iterate over something periodically, it should be stored persistently. We also could use some kind of file storage, e.g., json or yaml config, but updating big formatted files is error-prone. Also with a database, we can introduce pagination when the list becomes too big, to avoid loading it all into the memory.
-However I introduced the repository pattern here, so the storage mechanism can be easily replaced in the future.
+I would store URLs in the database (as implemented) because to iterate over data periodically, it should be stored persistently. We could also use some kind of file storage, e.g., JSON or YAML config, but updating big formatted files is error-prone. Also, with a database, we can introduce pagination when the list becomes too big, to avoid loading it all into memory.
+However, I introduced the repository pattern here, so the storage mechanism can be easily replaced in the future.
 
 ## Checks
 
 - For the check there is a timeout of 30 seconds.
-- The regexp is checked against first 64KB of the page
+- The regex is checked against the first 64KB of the page
 
 ## Environment Variables
 
@@ -60,11 +60,11 @@ The application handles `SIGINT` and `SIGTERM` signals for graceful shutdown:
 
 ## Migrations
 
-I used `golang-migrate` for migrations. That is the same thing I would use on prod, however with a couple of changes:
+We used `golang-migrate` for migrations. That is the same thing I would use on prod, however with a couple of changes:
 - Migrations would be run in their own container. Something similar is actually implemented in docker-compose
 - There would be down migrations
 
-Migration files can be found in internal/migrations
+Migration files can be found in `internal/migrations`
 
 ## Local
 
