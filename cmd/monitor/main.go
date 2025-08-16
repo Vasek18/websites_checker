@@ -92,12 +92,7 @@ func waitForShutdown(cancel context.CancelFunc, sched *scheduler.Scheduler) erro
 	return performGracefulShutdown(cancel, sched)
 }
 
-// Stoppable is introduced for testability // todo to move closer to scheduler
-type Stoppable interface {
-	Stop()
-}
-
-func performGracefulShutdown(cancel context.CancelFunc, sched Stoppable) error {
+func performGracefulShutdown(cancel context.CancelFunc, sched scheduler.Stoppable) error {
 	// Cancel context to signal all goroutines to stop
 	cancel()
 
